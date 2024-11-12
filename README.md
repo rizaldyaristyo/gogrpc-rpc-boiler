@@ -1,4 +1,4 @@
-# API Documentation: Synapsis Challenge Test
+# API Documentation
 
 ### Base URL
 
