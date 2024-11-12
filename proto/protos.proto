@@ -1,0 +1,259 @@
+syntax = "proto3";
+
+package protos;
+
+option go_package = "./proto;protos";
+
+import "google/protobuf/empty.proto";
+
+service UtilService {
+    rpc HelloWorld(StringRequest) returns (StringResponse);
+    rpc Ping(google.protobuf.Empty) returns (StringResponse);
+    rpc AuthWithoutCredentials(StringRequest) returns (StringResponse);
+}
+
+message StringRequest {
+    string request_str = 1;
+}
+message StringResponse {
+    string response_str = 1;
+}
+
+message IntRequest {
+    int32 request_int = 1;
+}
+message IntResponse {
+    int32 response_int = 1;
+}
+
+message BoolResponse {
+    bool response_bool = 1;
+}
+
+service UserService {
+    rpc CreateUser(UserSensitive) returns (StringResponse);
+    rpc LoginAuth(UserPassword) returns (StringResponse);
+    rpc ChangePassword(NewPassword) returns (StringResponse);
+    rpc DeleteUser(UserIDPassword) returns (StringResponse);
+    rpc GetUser(IntRequest) returns (User);
+    rpc DoesUserExist(IntRequest) returns (BoolResponse);
+}
+
+message UserSensitive {
+    string username = 1;
+    string password = 2;
+    string first_name = 3;
+    string last_name = 4;
+    string email = 5;
+    string role = 6;
+    string created_at = 7;
+    string updated_at = 8;
+}
+
+message User {
+    int32 user_id = 1;
+    string username = 2;
+    string first_name = 4;
+    string last_name = 5;
+    string email = 6;
+    string role = 7;
+}
+
+message UserPassword {
+    string username = 1;
+    string password = 2;
+}
+
+message UserIDPassword {
+    int32 user_id = 1;
+    string password = 2;
+}
+
+message NewPassword {
+    string username = 1;
+    string password = 2;
+    string new_password = 3;
+}
+
+service CategoryService {
+    rpc CreateCategory(Category) returns (StringResponse);
+    rpc GetCategories(IDLimits) returns (CategoryMins);
+    rpc GetCategoriesByName(StringRequest) returns (CategoryMins); // Inexact
+    rpc GetCategoryByID(IntRequest) returns (Category);
+    rpc EditCategory(UpdateCategory) returns (StringResponse);
+    rpc DeleteCategory(IntRequest) returns (StringResponse);
+    rpc DoesCategoryExist(IntRequest) returns (BoolResponse);
+}
+
+message Category {
+    string name = 1;
+    string description = 2;
+    string created_at = 3;
+    string updated_at = 4;
+}
+
+message CategoryMin {
+    int32 category_id = 1;
+    string name = 2;
+}
+
+message CategoryMins {
+    repeated CategoryMin categories = 1;
+}
+
+message UpdateCategory {
+    int32 category_id = 1;
+    string new_name = 2;
+    string new_description = 3;
+    string updated_at = 4;
+}
+
+service AuthorService {
+    rpc CreateAuthor(Author) returns (StringResponse);
+    rpc GetAuthors(IDLimits) returns (AuthorMins);
+    rpc GetAuthorsByName(StringRequest) returns (AuthorMins); // Inexact
+    rpc GetAuthorByID(IntRequest) returns (Author);
+    rpc EditAuthor(UpdateAuthor) returns (StringResponse);
+    rpc DeleteAuthor(IntRequest) returns (StringResponse);
+    rpc DoesAuthorExist(IntRequest) returns (BoolResponse);
+}
+
+message DateLimits {
+    string start_date = 1; // format: 1997-06-26
+    string end_date = 2; // format: 1997-06-26
+}
+
+message IDLimits {
+    int32 min = 1;
+    int32 max = 2;
+}
+
+message Author {
+    string name = 1;
+    string birthdate = 2; // format: 1997-06-26
+    string nationality = 3;
+    string biography = 4;
+    string created_at = 5;
+    string updated_at = 6;
+}
+
+message AuthorMin {
+    int32 author_id = 1;
+    string name = 2;
+}
+
+message AuthorMins {
+    repeated AuthorMin authors = 1;
+}
+
+message UpdateAuthor {
+    int32 author_id = 1;
+    string new_name = 2;
+    string new_birthdate = 3; // format: 1997-06-26
+    string new_nationality = 4;
+    string new_biography = 5;
+    string updated_at = 6;
+}
+
+service BookAndBorrowService {
+    rpc IsAuthorInUseByBook (IntRequest) returns (BoolResponse);
+    rpc IsCategoryInUseByBook (IntRequest) returns (BoolResponse);
+    
+    rpc CreateBook(Book) returns (StringResponse);
+    rpc GetBooks(IDLimits) returns (BookMins);
+    rpc GetBooksByDate(DateLimits) returns (BookMins);
+    rpc GetBooksByName(StringRequest) returns (BookMins); // Inexact
+    rpc GetBookByID(IntRequest) returns (Book);
+    rpc EditBook(UpdateBook) returns (StringResponse);
+    rpc DeleteBook(IntRequest) returns (StringResponse);
+
+    rpc DoesUserStillBorrow(IntRequest) returns (BoolResponse); // user_id --> false
+    rpc CreateBorrow(Borrow) returns (StringResponse);
+    rpc CreateReturn(IntRequest) returns (StringResponse);
+
+    rpc GetBorrowings(IDLimits) returns (BorrowOrReturnMins);
+    rpc GetBorrowingsByDate(DateLimits) returns (BorrowOrReturnMins);
+    rpc GetBorrowingsByUserID(IntRequest) returns (BorrowOrReturnMins);
+
+    rpc GetReturns(IDLimits) returns (BorrowOrReturnMins);
+    rpc GetReturnsByDate(DateLimits) returns (BorrowOrReturnMins);
+    rpc GetReturnsByUserID(IntRequest) returns (BorrowOrReturnMins);
+
+    rpc GetOverdues(DateLimits) returns (BorrowOrReturnMins);
+    
+    rpc EditBorrow(UpdateBorrow) returns (StringResponse);
+    rpc DeleteBorrow(IntRequest) returns (StringResponse);
+
+    rpc GetBookRecommendations(GetRecommendation) returns (BookMins);
+}
+
+message GetRecommendation {
+    int32 category_id = 1;
+    int32 limit = 2;
+}
+
+message Book {
+    string title = 1;
+    int32 category_id = 2;
+    int32 author_id = 3;
+    string published_date = 4; // format:   
+    string isbn = 5;
+    int32 total_stock = 6;
+    int32 available_stock = 7;
+    string created_at = 8;
+    string updated_at = 9;
+}
+message BookMin {
+    int32 book_id = 1;
+    string title = 2;
+    int32 category_id = 3;
+    string author_id = 4;
+    string published_date = 5; // format: 1997-06-26
+    int32 available_stock = 6;
+}
+message BookMins {
+    repeated BookMin books = 1;
+}
+message UpdateBook {
+    int32 book_id = 1;
+    string new_title = 2;
+    int32 new_category_id = 3;
+    int32 new_author_id = 4;
+    string new_published_date = 5; // format: 1997-06-26
+    string new_isbn = 6;
+    int32 new_total_stock = 7;
+    int32 new_available_stock = 8;
+    string updated_at = 9;
+}
+message Borrow {
+    int32 book_id = 1;
+    int32 user_id = 2;
+    string borrowed_date = 3;
+    string return_date = 4;
+    string returned_date = 5;
+    string returned = 6; // t/f
+}
+message BorrowOrReturnMin {
+    int32 borrowing_id = 1;
+    int32 book_id = 2;
+    int32 user_id = 3;
+    string borrowed_date = 4;
+    string return_date = 5;
+}
+message BorrowOrReturnMins {
+    string message = 1; // "borrowed" or "returned"
+    repeated BorrowOrReturnMin borrowings = 2;
+}
+
+message UpdateBorrow {
+    int32 borrowing_id = 1;
+    int32 new_book_id = 2;
+    int32 new_user_id = 3;
+    string new_borrowed_date = 4;
+    string new_return_date = 5;
+    string new_returned_date = 6;
+    string new_returned = 7; // t/f
+}
+
+// Compile Proto
+// protoc --go_out=. --go-grpc_out=. proto/protos.proto
